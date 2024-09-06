@@ -1,0 +1,432 @@
+{
+	"info": {
+		"_postman_id": "b7d69143-0f5e-40ce-b797-eb31afb41540",
+		"name": "FIAP - Tech Challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36376710"
+	},
+	"item": [
+		{
+			"name": "Produto",
+			"item": [
+				{
+					"name": "CriarProduto (Lanche)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"x-bacon\",\r\n    \"descricao\": \"Hambúrguer de 180 gramas, queijo prato, bacon e maionese da casa.\",\r\n    \"valor\": 35.99,\r\n    \"nomeCategoria\": \"Lanche\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Produto",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Produto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CriarProduto (Acompanhamento)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"Batata Frita\",\r\n    \"descricao\": \"Batata Frita 200 gramas.\",\r\n    \"valor\": 9.99,\r\n    \"nomeCategoria\": \"Acompanhamento\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Produto",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Produto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CriarProduto (Bebida)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"Suco de Laranja\",\r\n    \"descricao\": \"Suco de Laranja Natural 350 ml.\",\r\n    \"valor\": 5.99,\r\n    \"nomeCategoria\": \"Bebida\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Produto",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Produto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObterPorCategoria",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/Produto/:categoria",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Produto",
+								":categoria"
+							],
+							"variable": [
+								{
+									"key": "categoria",
+									"value": "Lanche"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AtualizarProduto",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"nome\": \"x-bacon salada\",\r\n    \"descricao\": \"Hambúrguer de 180 gramas, queijo prato, bacon, alface, tomate e maionese da casa.\",\r\n    \"valor\": 37.99,\r\n    \"nomeCategoria\": \"Lanche\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Produto",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Produto"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RemoverProduto",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/Produto?id=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Produto"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cliente",
+			"item": [
+				{
+					"name": "CadastrarCliente",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"Usuário Teste\",\r\n    \"cpf\": \"27020137083\",\r\n    \"email\": \"usuario.teste@outlook.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Cliente",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Cliente"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObterClientePorCpf",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/Cliente/:cpf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Cliente",
+								":cpf"
+							],
+							"variable": [
+								{
+									"key": "cpf",
+									"value": "27020137083"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pedido",
+			"item": [
+				{
+					"name": "CriarPedido",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cpf\": \"27020137083\",\r\n    \"produtoQuantidades\": [\r\n        {\r\n        \"idProduto\": 2,\r\n        \"quantidade\": 1\r\n        },\r\n        {\r\n        \"idProduto\": 3,\r\n        \"quantidade\": 1\r\n        }\r\n    ],\r\n    \"idFormaPagamento\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Pedido",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Pedido"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObterPedidos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/Pedido",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Pedido"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObterPedidoPorId",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/Pedido/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Pedido",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObterPedidosFiltrado",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/Pedido/Filtrados",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Pedido",
+								"Filtrados"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObterStatusPagamentoPorId",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/Pedido/StatusPagamento/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Pedido",
+								"StatusPagamento",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AtualizarStatusPedido",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": 1,\r\n  \"statusPedido\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Pedido/StatusPedido",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Pedido",
+								"StatusPedido"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AtualizarStatusPagamento",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"PedidoId\": 1,\r\n  \"statusPagamento\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/Pedido/StatusPagamento",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"Pedido",
+								"StatusPagamento"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
