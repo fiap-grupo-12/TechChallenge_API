@@ -1,4 +1,4 @@
-name: 2 - SonarCloud
+name: SonarCloud
 
 on:
   workflow_call:

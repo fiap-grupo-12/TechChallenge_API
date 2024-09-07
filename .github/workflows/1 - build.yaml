@@ -7,7 +7,7 @@ on:
     branches: [ "feature/*" ]
 
 jobs:
-  build:
+  Build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -22,20 +22,20 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
   
-  sonar:
+  SonarCloud:
     runs-on: ubuntu-latest
-    needs: build
+    needs: Build
     steps:
       - name: Run SonarQube Analysis
-        uses: ./.github/actions/sonar-action
+        uses: ./.github/workflows/sonar.yaml
         with:
           args: 'sonar-scanner'
         env:
           GITHUB_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  pullrequest:
+  Pull-Request:
     runs-on: ubuntu-latest
-    needs: sonar
+    needs: SonarCloud
     steps:
     - name: Buscando nome da branch
       shell: bash
