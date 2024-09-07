@@ -1,16 +1,14 @@
-name: 1 - build
+name: WorkFlow
 
 on:
   push:
-    branches: [ "main", "feature/*" ]
+    branches: [ "feature/*" ]
   pull_request:
-    branches: [ "main", "feature/*" ]
+    branches: [ "feature/*" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -23,3 +21,29 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+  
+  sonar:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Run SonarQube Analysis
+        uses: ./.github/actions/sonar-action
+        with:
+          args: 'sonar-scanner'
+        env:
+          GITHUB_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  pullrequest:
+    runs-on: ubuntu-latest
+    needs: sonar
+    steps:
+    - name: Buscando nome da branch
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+
+    - name: create pull request
+      run: gh pr create -B main -H ${{ steps.extract_branch.outputs.branch }} --title 'Pull Request - ${{ steps.extract_branch.outputs.branch }} para main' --body 'Created by Github action'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
