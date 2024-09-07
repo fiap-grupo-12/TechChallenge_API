@@ -29,8 +29,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run SonarQube Analysis
         uses: ./.github/workflows/sonar.yaml
-        with:
-          args: 'sonar-scanner'
         env:
           GITHUB_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
