@@ -27,10 +27,7 @@ jobs:
     needs: Build
     steps:
       - uses: actions/checkout@v4
-      - name: Run SonarQube Analysis
-        uses: ./.github/workflows/sonar.yaml
-        env:
-          GITHUB_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - uses: ./.github/workflows/sonar.yaml
 
   Pull-Request:
     runs-on: ubuntu-latest
