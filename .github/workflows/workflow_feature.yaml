@@ -23,6 +23,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
   
   SonarCloud:
+    needs: Build
     uses: ./.github/workflows/sonar.yaml
     secrets: 
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
