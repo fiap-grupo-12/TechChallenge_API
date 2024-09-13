@@ -142,17 +142,66 @@ resource "aws_ecs_task_definition" "service" {
   }
 }
 
+//Cluster
+resource "aws_ecs_cluster" "cluster_tech_challenge" {
+  name = "cluster-tech-challenge"
+}
+
+//LoadBalancer
+resource "aws_lb_target_group" "staging" {
+  name     = "tf-example-lb-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = data.aws_vpc.default.id
+}
+
+resource "aws_lb" "staging" {
+  name               = "test-lb-tf"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.lb.id]
+  subnets            = [for subnet in aws_subnet.default : subnet.id]
+
+  enable_deletion_protection = true
+
+  # access_logs {
+  #   bucket  = aws_s3_bucket.lb_logs.id
+  #   prefix  = "test-lb"
+  #   enabled = true
+  # }
+
+  tags = {
+    Environment = "production"
+  }
+}
+
+resource "aws_lb_listener" "staging" {
+  load_balancer_arn = aws_lb.staging.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Fixed response content"
+      status_code  = "200"
+    }
+  }
+}
+
 //ECS
 resource "aws_ecs_service" "staging" {
   name            = "staging"
-  cluster         = aws_ecs_cluster.staging.id
+  cluster         = aws_ecs_cluster.cluster_tech_challenge.id
   task_definition = aws_ecs_task_definition.service.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets          = data.aws_subnet_ids.default.ids
+    subnets          = data.aws_subnet.default.ids
     assign_public_ip = true
   }
 
