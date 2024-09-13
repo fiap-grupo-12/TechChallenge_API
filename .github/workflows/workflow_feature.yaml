@@ -1,0 +1,36 @@
+name: WorkFlow
+
+on:
+  push:
+    branches: [ "feature/*" ]
+  pull_request:
+    branches: [ "feature/*" ]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src
+        shell: bash
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+  
+  SonarCloud:
+    needs: Build
+    uses: ./.github/workflows/sonar.yaml
+    secrets: 
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
