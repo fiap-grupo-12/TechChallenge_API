@@ -67,7 +67,7 @@ resource "aws_lb" "main" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
-  subnets            = [data.aws_subnets.default.ids]
+  subnets            = data.aws_subnets.default.ids
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
@@ -127,7 +127,7 @@ resource "aws_ecs_service" "app" {
   desired_count   = 1
   launch_type     = "FARGATE"
   network_configuration {
-    subnets          = [data.aws_subnets.default.ids]
+    subnets          = data.aws_subnets.default.ids
     security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
