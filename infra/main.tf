@@ -1,9 +1,8 @@
-//Define a regiao e credenciais da AWS 
 provider "aws" {
   region = "us-east-1"
 }
 
-//Busca a VPC e Sub-Net padroes da AWS
+# Usar VPC e Subnet padrão
 data "aws_vpc" "default" {
   default = true
 }
@@ -12,14 +11,11 @@ data "aws_subnet" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
-resource "aws_subnet" "main" {
-  vpc_id = aws_vpc.default.id
-}
-
-//Cria Security Group para o LoadBalancer e ECS
-resource "aws_security_group" "lb" {
+# Security Group para o LoadBalancer
+resource "aws_security_group" "lb_sg" {
   name        = "lb-sg"
-  description = "Controle de acesso ao Application Load Balancer (ALB)"
+  description = "Controle de acesso ao Load Balancer"
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
     protocol    = "tcp"
@@ -36,16 +32,17 @@ resource "aws_security_group" "lb" {
   }
 }
 
-resource "aws_security_group" "ecs_tasks" {
+# Security Group para o ECS
+resource "aws_security_group" "ecs_sg" {
   name        = "ecs-tasks-sg"
-  description = "Permitir acesso ao ECS apenas via Load Balancer"
+  description = "Permitir acesso ao ECS via Load Balancer"
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    protocol        = "tcp"
-    from_port       = 4000
-    to_port         = 4000
-    cidr_blocks     = ["0.0.0.0/0"]
-    security_groups = [aws_security_group.lb.id]
+    protocol    = "tcp"
+    from_port   = 4000
+    to_port     = 4000
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -56,179 +53,105 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
-//Criacao do ECR
-resource "aws_ecr_repository" "repo" {
-  name = "TechChallenge/API"
+# ECR para armazenar a imagem do projeto
+resource "aws_ecr_repository" "project_repo" {
+  name = "dotnet-project-repo"
 }
 
-resource "aws_ecr_lifecycle_policy" "repo-policy" {
-  repository = aws_ecr_repository.repo.name
-
-  policy = <<EOF
-{
-  "rules": [
-    {
-      "rulePriority": 1,
-      "description": "Manter a imagem implantada com a tag mais recente",
-      "selection": {
-        "tagStatus": "tagged",
-        "tagPrefixList": ["latest"],
-        "countType": "imageCountMoreThan",
-        "countNumber": 1
-      },
-      "action": {
-        "type": "expire"
-      }
-    },
-    {
-      "rulePriority": 2,
-      "description": "Manter as últimas 2 imagens",
-      "selection": {
-        "tagStatus": "any",
-        "countType": "imageCountMoreThan",
-        "countNumber": 2
-      },
-      "action": {
-        "type": "expire"
-      }
-    }
-  ]
-}
-EOF
+# LoadBalancer
+resource "aws_lb" "main" {
+  name               = "ecs-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.lb_sg.id]
+  subnets            = [data.aws_subnet.default.id]
 }
 
-//IAM
-data "aws_iam_policy_document" "ecs_task_execution_role" {
-  version = "2012-10-17"
-  statement {
-    sid     = ""
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "ecs-staging-execution-role"
-  assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_role.json
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-//Importar Task Definition
-data "template_file" "sproutlyapp" {
-  template = file("./TaskDefinition.json")
-  vars = {
-    aws_ecr_repository = aws_ecr_repository.repo.repository_url
-    tag                = "latest"
-    app_port           = 80
-  }
-}
-
-resource "aws_ecs_task_definition" "service" {
-  family                   = "techchallenge-api"
-  network_mode             = "awsvpc"
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  cpu                      = 256
-  memory                   = 2048
-  requires_compatibilities = ["FARGATE"]
-  container_definitions    = data.template_file.sproutlyapp.rendered
-  tags = {
-    Environment = "staging"
-    Application = "TechChallenge-API"
-  }
-}
-
-//Cluster
-resource "aws_ecs_cluster" "cluster_tech_challenge" {
-  name = "cluster-tech-challenge"
-}
-
-//LoadBalancer
-resource "aws_lb_target_group" "staging" {
-  name     = "tf-example-lb-tg"
+resource "aws_lb_target_group" "ecs_tg" {
+  name     = "ecs-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = data.aws_vpc.default.id
 }
 
-resource "aws_lb" "staging" {
-  name               = "test-lb-tf"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb.id]
-  subnets            = [for subnet in aws_subnet.default : subnet.id]
-
-  enable_deletion_protection = true
-
-  # access_logs {
-  #   bucket  = aws_s3_bucket.lb_logs.id
-  #   prefix  = "test-lb"
-  #   enabled = true
-  # }
-
-  tags = {
-    Environment = "production"
-  }
-}
-
-resource "aws_lb_listener" "staging" {
-  load_balancer_arn = aws_lb.staging.arn
-  port              = "80"
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 80
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Fixed response content"
-      status_code  = "200"
-    }
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ecs_tg.arn
   }
 }
 
-//ECS
-resource "aws_ecs_service" "staging" {
-  name            = "staging"
-  cluster         = aws_ecs_cluster.cluster_tech_challenge.id
-  task_definition = aws_ecs_task_definition.service.arn
+# ECS Cluster
+resource "aws_ecs_cluster" "main" {
+  name = "ecs-cluster"
+}
+
+# Task Definition para o ECS
+resource "aws_ecs_task_definition" "app" {
+  family                   = "ecs-task"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "dotnet-app"
+      image     = "${aws_ecr_repository.project_repo.repository_url}:latest"
+      cpu       = 256
+      memory    = 512
+      essential = true
+      portMappings = [
+        {
+          containerPort = 4000
+          hostPort      = 4000
+        }
+      ]
+    }
+  ])
+}
+
+# Serviço ECS
+resource "aws_ecs_service" "app" {
+  name            = "ecs-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 1
   launch_type     = "FARGATE"
-
   network_configuration {
-    security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets          = data.aws_subnet.default.id
+    subnets          = [data.aws_subnet.default.id]
+    security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
-
   load_balancer {
-    target_group_arn = aws_lb_target_group.staging.arn
-    container_name   = "cloud-techchallenge"
+    target_group_arn = aws_lb_target_group.ecs_tg.arn
+    container_name   = "dotnet-app"
     container_port   = 4000
-  }
-
-  // depends_on = [aws_lb_listener.https_forward, aws_iam_role_policy_attachment.ecs_task_execution_role]
-
-  tags = {
-    Environment = "staging"
-    Application = "sproutlyapi"
   }
 }
 
-//Cloud watch
-resource "aws_cloudwatch_log_group" "TechChallenge-API" {
-  name = "awslogs-TechChallenge-API-staging"
+# Função de execução do ECS (IAM Role)
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecs_task_execution_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
 
-  tags = {
-    Environment = "staging"
-    Application = "TechChallenge-API"
-  }
+# Attach policy to allow ECS tasks to pull images from ECR
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
