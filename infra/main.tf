@@ -12,6 +12,10 @@ data "aws_subnet" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
+resource "aws_subnet" "main" {
+  vpc_id = aws_vpc.default.id
+}
+
 //Cria Security Group para o LoadBalancer e ECS
 resource "aws_security_group" "lb" {
   name        = "lb-sg"
@@ -201,7 +205,7 @@ resource "aws_ecs_service" "staging" {
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets          = data.aws_subnet.default.ids
+    subnets          = data.aws_subnet.default.id
     assign_public_ip = true
   }
 
@@ -211,7 +215,7 @@ resource "aws_ecs_service" "staging" {
     container_port   = 4000
   }
 
-  depends_on = [aws_lb_listener.https_forward, aws_iam_role_policy_attachment.ecs_task_execution_role]
+  // depends_on = [aws_lb_listener.https_forward, aws_iam_role_policy_attachment.ecs_task_execution_role]
 
   tags = {
     Environment = "staging"
