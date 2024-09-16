@@ -33,7 +33,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./src/API
+        working-directory: ./src
         shell: bash
 
     steps:
