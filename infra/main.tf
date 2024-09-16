@@ -2,36 +2,32 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Usar VPC e Subnet padrão
+terraform {
+  backend "s3" {
+    bucket = "terraform-tfstate-grupo12-fiap-2024"
+    key    = "api/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+data "aws_caller_identity" "current" {}
+
 data "aws_vpc" "default" {
   default = true
+}
+
+data "aws_ecs_cluster" "main" {
+  cluster_name = "ecs-cluster"
+}
+
+data "aws_lb_target_group" "ecs_tg" {
+  name = "ecs-tg"
 }
 
 data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.default.id]
-  }
-}
-
-# Security Group para o LoadBalancer
-resource "aws_security_group" "lb_sg" {
-  name        = "lb-sg"
-  description = "Controle de acesso ao Load Balancer"
-  vpc_id      = data.aws_vpc.default.id
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 80
-    to_port     = 80
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -56,41 +52,20 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
-# ECR para armazenar a imagem do projeto
-resource "aws_ecr_repository" "project_repo" {
-  name = "dotnet-project-repo"
-}
 
-# LoadBalancer
-resource "aws_lb" "main" {
-  name               = "ecs-lb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb_sg.id]
-  subnets            = data.aws_subnets.default.ids
-}
-
-resource "aws_lb_target_group" "ecs_tg" {
-  name     = "ecs-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = data.aws_vpc.default.id
-}
-
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.main.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.ecs_tg.arn
-  }
-}
-
-# ECS Cluster
-resource "aws_ecs_cluster" "main" {
-  name = "ecs-cluster"
+# Função de execução do ECS (IAM Role)
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecs_task_execution_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
 }
 
 # Task Definition para o ECS
@@ -105,7 +80,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = "dotnet-app"
-      image     = "${aws_ecr_repository.project_repo.repository_url}:latest"
+      image     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/techchallenge_api:latest"
       cpu       = 256
       memory    = 512
       essential = true
@@ -122,7 +97,7 @@ resource "aws_ecs_task_definition" "app" {
 # Serviço ECS
 resource "aws_ecs_service" "app" {
   name            = "ecs-service"
-  cluster         = aws_ecs_cluster.main.id
+  cluster         = data.aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 1
   launch_type     = "FARGATE"
@@ -132,26 +107,12 @@ resource "aws_ecs_service" "app" {
     assign_public_ip = true
   }
   load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_tg.arn
+    target_group_arn = data.aws_lb_target_group.ecs_tg.arn
     container_name   = "dotnet-app"
     container_port   = 4000
   }
 }
 
-# Função de execução do ECS (IAM Role)
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecs_task_execution_role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-    }]
-  })
-}
 
 # Attach policy to allow ECS tasks to pull images from ECR
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
