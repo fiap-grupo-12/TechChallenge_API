@@ -12,9 +12,16 @@ terraform {
 
 data "aws_caller_identity" "current" {}
 
-# Usar VPC e Subnet padrão
 data "aws_vpc" "default" {
   default = true
+}
+
+data "aws_ecs_cluster" "main" {
+  cluster_name = "ecs-cluster"
+}
+
+data "aws_lb_target_group" "ecs_tg" {
+  name = "ecs-tg"
 }
 
 data "aws_subnets" "default" {
