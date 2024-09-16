@@ -10,6 +10,8 @@ terraform {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
 # Usar VPC e Subnet padrão
 data "aws_vpc" "default" {
   default = true
@@ -71,7 +73,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = "dotnet-app"
-      image     = "${aws_ecr_repository.project_repo.repository_url}:latest"
+      image     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/techchallenge_api:latest"
       cpu       = 256
       memory    = 512
       essential = true

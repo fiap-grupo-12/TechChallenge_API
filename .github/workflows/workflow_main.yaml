@@ -55,10 +55,10 @@ jobs:
       run: docker build -t techchallenge_api .
 
     - name: Tag Docker image
-      run: docker tag techchallenge_api:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/dotnet-project-repo:latest
+      run: docker tag techchallenge_api:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/techchallenge_api:latest
 
     - name: Push Docker image to ECR
-      run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/dotnet-project-repo:latest
+      run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/techchallenge_api:latest
 
   Terraform:
     needs: 'CreateImage'
