@@ -97,7 +97,7 @@ resource "aws_ecs_task_definition" "app" {
 # Serviço ECS
 resource "aws_ecs_service" "app" {
   name            = "ecs-service"
-  cluster         = aws_ecs_cluster.main.id
+  cluster         = data.aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 1
   launch_type     = "FARGATE"
@@ -107,7 +107,7 @@ resource "aws_ecs_service" "app" {
     assign_public_ip = true
   }
   load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_tg.arn
+    target_group_arn = data.aws_lb_target_group.ecs_tg.arn
     container_name   = "dotnet-app"
     container_port   = 4000
   }
