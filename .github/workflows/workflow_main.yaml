@@ -77,6 +77,12 @@ jobs:
   destroy:
     name: Terraform Destroy
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./infra
+        shell: bash
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
