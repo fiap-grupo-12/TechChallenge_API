@@ -1,5 +1,8 @@
 using FIAP.TechChallenge.ByteMeBurguer.API.Extensions;
 using FIAP.TechChallenge.ByteMeBurguer.Application;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +10,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddProjectDependencies();
+var connectionString = SecretsService.GetSecret("dbConnectionString");
+
+builder.Services.AddProjectDependencies(connectionString);
+
+//HealthCheck
+builder.Services.AddHealthChecks().AddSqlServer(connectionString!);
+builder.Services.AddHealthChecks().AddCheck("application", () =>
+{
+    return HealthCheckResult.Healthy("Aplicação em execução");
+});
 
 var app = builder.Build();
 
@@ -23,6 +35,12 @@ using (var scope = app.Services.CreateScope())
     initializer.Initialize();
 }
 
+app.UseHealthChecks("/healthz", new HealthCheckOptions
+{
+    Predicate = _ => true,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -30,3 +48,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
