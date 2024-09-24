@@ -27,7 +27,12 @@ namespace FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Extensions
                     new FormaPagamento { Nome = "Mercado Pago" }
                     );
 
-                dbContext.SaveChanges();
+                    dbContext.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex);
             }
         }
     }

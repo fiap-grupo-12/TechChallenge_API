@@ -13,7 +13,7 @@ namespace FIAP.TechChallenge.ByteMeBurguer.API.Extensions
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddProjectDependencies(this IServiceCollection services)
+        public static void AddProjectDependencies(this IServiceCollection services, string connectionString)
         {
   
             //AutoMapper
@@ -48,12 +48,20 @@ namespace FIAP.TechChallenge.ByteMeBurguer.API.Extensions
             services.AddTransient<IRemoverProdutoUseCase, RemoverProdutoUseCase>();
             services.AddTransient<IAtualizarStatusPagamentoUseCase, AtualizarStatusPagamentoUseCase>();
 
-            //Infra Data
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Environment.GetEnvironmentVariable("SQLServerConnection")));
-            services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
+            //AWS
+            services.AddDefaultAWSOptions(new Amazon.Extensions.NETCore.Setup.AWSOptions()
+            {
+                Region = Amazon.RegionEndpoint.USEast1
+            });
+            services.AddAWSService<IAmazonSecretsManager>();
 
-            return services;
+            //DataBase
+            services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+            {
+                options.UseSqlServer(connectionString!);
+            });
+
+            services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
         }
     }
 }
