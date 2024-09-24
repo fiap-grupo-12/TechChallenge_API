@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = SecretsService.GetSecret("dbConnectionString");
+var connectionString = SecretsService.GetSecret("sql_connection_string");
 
 builder.Services.AddProjectDependencies(connectionString);
 
@@ -18,7 +18,7 @@ builder.Services.AddProjectDependencies(connectionString);
 builder.Services.AddHealthChecks().AddSqlServer(connectionString!);
 builder.Services.AddHealthChecks().AddCheck("application", () =>
 {
-    return HealthCheckResult.Healthy("Aplicação em execução");
+    return HealthCheckResult.Healthy("AplicaÃ§Ã£o em execuÃ§Ã£o");
 });
 
 var app = builder.Build();
