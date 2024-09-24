@@ -1,19 +1,19 @@
-﻿using AutoMapper;
-using FIAP.TechChallenge.ByteMeBurguer.Application.UseCases.Interfaces;
-using FIAP.TechChallenge.ByteMeBurguer.Application.UseCases;
-using FIAP.TechChallenge.ByteMeBurguer.Domain.Repositories;
-using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Repositories;
-using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Configurations;
+﻿using Amazon.SecretsManager;
+using AutoMapper;
 using FIAP.TechChallenge.ByteMeBurguer.Application;
+using FIAP.TechChallenge.ByteMeBurguer.Application.UseCases;
+using FIAP.TechChallenge.ByteMeBurguer.Application.UseCases.Interfaces;
+using FIAP.TechChallenge.ByteMeBurguer.Domain.Repositories;
+using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Configurations;
 using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Extensions;
+using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace FIAP.TechChallenge.ByteMeBurguer.API.Extensions
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddProjectDependencies(this IServiceCollection services)
+        public static void AddProjectDependencies(this IServiceCollection services, string connectionString)
         {
   
             //AutoMapper
@@ -48,12 +48,20 @@ namespace FIAP.TechChallenge.ByteMeBurguer.API.Extensions
             services.AddTransient<IRemoverProdutoUseCase, RemoverProdutoUseCase>();
             services.AddTransient<IAtualizarStatusPagamentoUseCase, AtualizarStatusPagamentoUseCase>();
 
-            //Infra Data
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Environment.GetEnvironmentVariable("SQLServerConnection")));
-            services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
+            //AWS
+            services.AddDefaultAWSOptions(new Amazon.Extensions.NETCore.Setup.AWSOptions()
+            {
+                Region = Amazon.RegionEndpoint.USEast1
+            });
+            services.AddAWSService<IAmazonSecretsManager>();
 
-            return services;
+            //DataBase
+            services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+            {
+                options.UseSqlServer(connectionString!);
+            });
+
+            services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
         }
     }
 }
