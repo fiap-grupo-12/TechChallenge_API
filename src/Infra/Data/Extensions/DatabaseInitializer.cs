@@ -15,17 +15,19 @@ namespace FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Extensions
         }
         public void Initialize()
         {
-            dbContext.Database.Migrate();
-
-            if (!dbContext.Categorias.Any())
+            try
             {
-                dbContext.AddRange(
-                    new Categoria { Nome = "Lanche" },
-                    new Categoria { Nome = "Acompanhamento" },
-                    new Categoria { Nome = "Bebida" },
-                    new Categoria { Nome = "Sobremesa" },
-                    new FormaPagamento { Nome = "Mercado Pago" }
-                    );
+                dbContext.Database.Migrate();
+
+                if (!dbContext.Categorias.Any())
+                {
+                    dbContext.AddRange(
+                        new Categoria { Nome = "Lanche" },
+                        new Categoria { Nome = "Acompanhamento" },
+                        new Categoria { Nome = "Bebida" },
+                        new Categoria { Nome = "Sobremesa" },
+                        new FormaPagamento { Nome = "Mercado Pago" }
+                        );
 
                     dbContext.SaveChanges();
                 }
