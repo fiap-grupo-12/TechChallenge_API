@@ -1,13 +1,13 @@
-﻿using AutoMapper;
-using FIAP.TechChallenge.ByteMeBurguer.Application.UseCases.Interfaces;
-using FIAP.TechChallenge.ByteMeBurguer.Application.UseCases;
-using FIAP.TechChallenge.ByteMeBurguer.Domain.Repositories;
-using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Repositories;
-using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Configurations;
+﻿using Amazon.SecretsManager;
+using AutoMapper;
 using FIAP.TechChallenge.ByteMeBurguer.Application;
+using FIAP.TechChallenge.ByteMeBurguer.Application.UseCases;
+using FIAP.TechChallenge.ByteMeBurguer.Application.UseCases.Interfaces;
+using FIAP.TechChallenge.ByteMeBurguer.Domain.Repositories;
+using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Configurations;
 using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Extensions;
+using FIAP.TechChallenge.ByteMeBurguer.Infra.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace FIAP.TechChallenge.ByteMeBurguer.API.Extensions
 {
