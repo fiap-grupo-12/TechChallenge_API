@@ -131,7 +131,7 @@ resource "aws_ecs_service" "app" {
   load_balancer {
     target_group_arn = data.aws_lb_target_group.ecs_tg.arn
     container_name   = "dotnet-app"
-    container_port   = 4000
+    container_port   = 8080
   }
 }
 
