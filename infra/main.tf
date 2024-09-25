@@ -35,8 +35,8 @@ resource "aws_security_group" "ecs_sg" {
 
   ingress {
     protocol    = "tcp"
-    from_port   = 4000
-    to_port     = 4000
+    from_port   = 8080
+    to_port     = 8080
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -44,27 +44,6 @@ resource "aws_security_group" "ecs_sg" {
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# Security Group para o RDS
-resource "aws_security_group" "rds_sg" {
-  name        = "rds-security-group"
-  description = "Permitir acesso ao RDS a partir do ECS"
-  vpc_id      = data.aws_vpc.default.id
-
-  ingress {
-    from_port       = 1433
-    to_port         = 1433
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -95,9 +74,13 @@ resource "aws_iam_policy" "ecs_task_policy" {
       {
         Effect = "Allow",
         Action = [
-          "secretsmanager:GetSecretValue",
-          "rds:DescribeDBInstances",
-          "rds:Connect"
+          "secretsmanager:*",
+          "rds:*",
+          "kms:*",
+          "ecs:*",
+          "ssmmessages:*",
+          "logs:*",
+          "cloudwatch:*"
         ],
         Resource = "*"
       }
@@ -130,7 +113,7 @@ resource "aws_ecs_task_definition" "app" {
       portMappings = [
         {
           containerPort = 8080
-          hostPort      = 80
+          hostPort      = 8080
         }
       ]
     }
@@ -152,7 +135,7 @@ resource "aws_ecs_service" "app" {
   load_balancer {
     target_group_arn = data.aws_lb_target_group.ecs_tg.arn
     container_name   = "dotnet-app"
-    container_port   = 4000
+    container_port   = 8080
   }
 }
 
