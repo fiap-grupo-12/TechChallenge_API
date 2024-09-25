@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.2" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
+    <PackageReference Include="AWS.Logger.AspNetCore" Version="3.5.3" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
     <PackageReference Include="AWSSDK.SecretsManager" Version="3.7.400.21" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />

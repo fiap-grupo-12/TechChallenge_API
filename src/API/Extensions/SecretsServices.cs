@@ -8,6 +8,14 @@ namespace FIAP.TechChallenge.ByteMeBurguer.API.Extensions
     {
         public static string GetSecret(string secretName)
         {
+            using var loggerFactory = LoggerFactory.Create(loggingBuilder => loggingBuilder
+                .SetMinimumLevel(LogLevel.Trace)
+                .AddConsole());
+
+            ILogger<SecretsService> logger = loggerFactory.CreateLogger<SecretsService>();
+
+            logger.LogInformation("Consumindo SecretsManager");
+
             string region = "us-east-1";
 
             IAmazonSecretsManager client = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(region));
@@ -26,10 +34,11 @@ namespace FIAP.TechChallenge.ByteMeBurguer.API.Extensions
             }
             catch (Exception e)
             {
-                Console.Write("Erro ao buscar secret " + e.Message);
+                logger.LogError("Erro ao buscar secret " + e.Message);
                 return string.Empty;
             }
 
+            logger.LogInformation($@"SecretsManager recuperado com sucesso: {response.SecretString}");
             return response.SecretString;
         }
     }
