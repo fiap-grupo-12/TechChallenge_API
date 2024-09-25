@@ -75,12 +75,12 @@ resource "aws_iam_policy" "ecs_task_policy" {
         Effect = "Allow",
         Action = [
           "secretsmanager:*",
-				  "rds:*",
-				  "kms:*",
-				  "ecs:*",
-				  "ssmmessages:*",
-				  "logs:*",
-				  "cloudwatch:*"
+          "rds:*",
+	  "kms:*",
+	  "ecs:*",
+	  "ssmmessages:*",
+	  "logs:*",
+	  "cloudwatch:*"
         ],
         Resource = "*"
       }
