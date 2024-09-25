@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = SecretsService.GetSecret("sql_connection");
+var connectionString = SecretsService.GetSecret("sqlConnectionString");
 
 builder.Services.AddProjectDependencies(connectionString);
 
