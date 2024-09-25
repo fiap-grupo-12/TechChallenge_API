@@ -48,27 +48,6 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
-# Security Group para o RDS
-resource "aws_security_group" "rds_sg" {
-  name        = "rds-security-group"
-  description = "Permitir acesso ao RDS a partir do ECS"
-  vpc_id      = data.aws_vpc.default.id
-
-  ingress {
-    from_port       = 1433
-    to_port         = 1433
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 # Função de execução do ECS (IAM Role)
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecs_task_execution_role"
