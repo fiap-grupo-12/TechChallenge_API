@@ -11,19 +11,15 @@ terraform {
 }
 
 data "aws_caller_identity" "current" {}
-
 data "aws_vpc" "default" {
   default = true
 }
-
 data "aws_ecs_cluster" "main" {
   cluster_name = "ecs-cluster"
 }
-
 data "aws_lb_target_group" "ecs_tg" {
   name = "ecs-tg"
 }
-
 data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
@@ -52,6 +48,26 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
+# Security Group para o RDS
+resource "aws_security_group" "rds_sg" {
+  name        = "rds-security-group"
+  description = "Permitir acesso ao RDS a partir do ECS"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port   = 1433
+    to_port     = 1433
+    protocol    = "tcp"
+    security_groups = [aws_security_group.ecs_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 # Função de execução do ECS (IAM Role)
 resource "aws_iam_role" "ecs_task_execution_role" {
@@ -66,6 +82,33 @@ resource "aws_iam_role" "ecs_task_execution_role" {
       }
     }]
   })
+}
+
+# Política IAM para acessar Secrets Manager e RDS
+resource "aws_iam_policy" "ecs_task_policy" {
+  name        = "ecs_task_policy"
+  description = "Permite que o ECS acesse o Secrets Manager e o RDS"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "rds:DescribeDBInstances",
+          "rds:Connect"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Vincular política ao role da execução
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = aws_iam_policy.ecs_task_policy.arn
 }
 
 # Task Definition para o ECS
@@ -86,8 +129,8 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [
         {
-          containerPort = 4000
-          hostPort      = 4000
+          containerPort = 8080
+          hostPort      = 80
         }
       ]
     }
@@ -112,7 +155,6 @@ resource "aws_ecs_service" "app" {
     container_port   = 4000
   }
 }
-
 
 # Attach policy to allow ECS tasks to pull images from ECR
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
