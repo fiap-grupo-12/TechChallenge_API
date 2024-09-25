@@ -1,3 +1,4 @@
+using AWS.Logger;
 using FIAP.TechChallenge.ByteMeBurguer.API.Extensions;
 using FIAP.TechChallenge.ByteMeBurguer.Application;
 using HealthChecks.UI.Client;
@@ -9,6 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configurar o logger para AWS CloudWatch Logs
+builder.Logging.AddAWSProvider(new AWSLoggerConfig
+{
+    LogGroup = "techchallenge_application",
+    Region = Amazon.RegionEndpoint.USEast1.OriginalSystemName
+});
 
 var connectionString = SecretsService.GetSecret("sqlConnectionString");
 
