@@ -76,11 +76,11 @@ resource "aws_iam_policy" "ecs_task_policy" {
         Action = [
           "secretsmanager:*",
           "rds:*",
-	  "kms:*",
-	  "ecs:*",
-	  "ssmmessages:*",
-	  "logs:*",
-	  "cloudwatch:*"
+          "kms:*",
+          "ecs:*",
+          "ssmmessages:*",
+          "logs:*",
+          "cloudwatch:*"
         ],
         Resource = "*"
       }
