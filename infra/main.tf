@@ -54,7 +54,16 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Action = "sts:AssumeRole"
+      Action = [
+        "secretsmanager:*",
+        "rds:*",
+        "kms:*",
+        "ecs:*",
+        "ssmmessages:*",
+        "logs:*",
+        "cloudwatch:*",
+        "sts:AssumeRole"
+      ]
       Effect = "Allow"
       Principal = {
         Service = "ecs-tasks.amazonaws.com"
