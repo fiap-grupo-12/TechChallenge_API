@@ -80,7 +80,11 @@ resource "aws_iam_policy" "ecs_task_policy" {
           "ecs:*",
           "ssmmessages:*",
           "logs:*",
-          "cloudwatch:*"
+          "cloudwatch:*",
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
         ],
         Resource = "*"
       }
