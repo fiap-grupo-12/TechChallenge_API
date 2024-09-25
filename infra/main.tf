@@ -35,8 +35,8 @@ resource "aws_security_group" "ecs_sg" {
 
   ingress {
     protocol    = "tcp"
-    from_port   = 4000
-    to_port     = 4000
+    from_port   = 8080
+    to_port     = 8080
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -54,7 +54,16 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Action = "sts:AssumeRole"
+      Action = [
+        "secretsmanager:*",
+        "rds:*",
+        "kms:*",
+        "ecs:*",
+        "ssmmessages:*",
+        "logs:*",
+        "cloudwatch:*",
+        "sts:AssumeRole"
+      ]
       Effect = "Allow"
       Principal = {
         Service = "ecs-tasks.amazonaws.com"
@@ -74,9 +83,13 @@ resource "aws_iam_policy" "ecs_task_policy" {
       {
         Effect = "Allow",
         Action = [
-          "secretsmanager:GetSecretValue",
-          "rds:DescribeDBInstances",
-          "rds:Connect"
+          "secretsmanager:*",
+          "rds:*",
+          "kms:*",
+          "ecs:*",
+          "ssmmessages:*",
+          "logs:*",
+          "cloudwatch:*"
         ],
         Resource = "*"
       }

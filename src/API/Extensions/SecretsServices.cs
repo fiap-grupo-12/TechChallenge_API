@@ -26,7 +26,8 @@ namespace FIAP.TechChallenge.ByteMeBurguer.API.Extensions
             }
             catch (Exception e)
             {
-                throw e;
+                Console.Write("Erro ao buscar secret " + e.Message);
+                return string.Empty;
             }
 
             return response.SecretString;
