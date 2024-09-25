@@ -74,9 +74,13 @@ resource "aws_iam_policy" "ecs_task_policy" {
       {
         Effect = "Allow",
         Action = [
-          "secretsmanager:GetSecretValue",
-          "rds:DescribeDBInstances",
-          "rds:Connect"
+          "secretsmanager:*",
+				  "rds:*",
+				  "kms:*",
+				  "ecs:*",
+				  "ssmmessages:*",
+				  "logs:*",
+				  "cloudwatch:*"
         ],
         Resource = "*"
       }
